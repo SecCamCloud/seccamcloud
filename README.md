@@ -33,7 +33,7 @@ Advanced automation tool with GUI interface, telemetry logging, and optional scr
 
 ✅ **Safety Features**
 - Watchdog timer for hang detection
-- Emergency stop via DELETE key (Windows)
+- Emergency stop via DELETE key (cross-platform)
 - Clean thread management
 - Graceful shutdown handling
 
@@ -104,7 +104,7 @@ run.bat --telemetry --dry-run
 **Start/Stop Buttons:**
 - **▶ Start Automation** - Begin the automation sequence
 - **⏹ Stop** - Stop the running automation
-- **DELETE key** (Windows) - Emergency stop
+- **DELETE key** - Emergency stop (all platforms)
 
 ### Settings Panel
 
@@ -236,10 +236,10 @@ cargo run --release --features screenshots -- --screenshots
 | Platform | GUI | Hotkeys | Screenshots | Status |
 |----------|-----|---------|-------------|--------|
 | **Windows 10/11** | ✅ | ✅ | ✅ | Full Support |
-| **Linux** | ✅ | ❌ | ✅ (X11 & Wayland) | Partial Support |
-| **macOS** | ✅ | ❌ | ⚠️ | Experimental |
+| **Linux** | ✅ | ✅ | ✅ (X11 & Wayland) | Full Support |
+| **macOS** | ✅ | ✅ | ⚠️ | Partial Support |
 
-**Note:** Emergency stop hotkey (DELETE) only works on Windows.
+**Note:** Emergency stop hotkey (DELETE key) now works on all platforms.
 
 ---
 
@@ -266,9 +266,10 @@ cargo run --release --features screenshots -- --screenshots
 
 ### Emergency stop doesn't work
 **Solution:**
-- Emergency stop only works on Windows
-- Use the GUI Stop button on other platforms
-- Check that the program window has focus
+- Press DELETE key (works on all platforms)
+- Use the GUI Stop button as alternative
+- Ensure the program window has focus
+- Check logs for hotkey registration errors
 
 ### Build fails with "screenshots" feature
 **Solution:**
@@ -295,7 +296,7 @@ cargo run --release --features screenshots -- --screenshots
 1. **Test First** - Always run with `--dry-run` before actual automation
 2. **Verify Coordinates** - Double-check all click points are correct
 3. **Monitor First Run** - Watch the first iteration carefully
-4. **Emergency Stop Ready** - Know that DELETE key stops immediately (Windows)
+4. **Emergency Stop Ready** - Know that DELETE key stops immediately
 5. **Close Important Windows** - Automation may interact with any visible window
 6. **Screenshots Warning** - Can fill disk space rapidly if enabled
 
