@@ -17,10 +17,11 @@ use std::time::{Duration, Instant};
 use chrono::Local;
 use clap::Parser;
 use eframe::egui;
+use global_hotkey::{GlobalHotKeyManager, GlobalHotKeyEvent, hotkey::{HotKey, Code, Modifiers}};
 
 use seccamcloud::{
     setup_logging, load_points, save_points, ClickPoint, AutomationThread,
-    AutomationMessage, is_windows, key_pressed, APP_TITLE, APP_VERSION,
+    AutomationMessage, APP_TITLE, APP_VERSION,
     Telemetry, ScreenshotManager,
 };
 
@@ -51,31 +52,41 @@ struct CliArgs {
 // ============================================================================
 
 struct HotkeyMonitor {
-    emergency_key: i32,
-    last_state: Mutex<bool>,
+    manager: GlobalHotKeyManager,
+    hotkey: HotKey,
 }
 
 impl HotkeyMonitor {
-    fn new() -> Self {
-        const VK_DELETE: i32 = 0x2E;
-        Self {
-            emergency_key: VK_DELETE,
-            last_state: Mutex::new(false),
-        }
+    fn new() -> Result<Self, String> {
+        let manager = GlobalHotKeyManager::new()
+            .map_err(|e| format!("Failed to create hotkey manager: {}", e))?;
+        
+        // Register DELETE key
+        let hotkey = HotKey::new(None, Code::Delete);
+        
+        manager.register(hotkey)
+            .map_err(|e| format!("Failed to register DELETE hotkey: {}", e))?;
+        
+        Ok(Self {
+            manager,
+            hotkey,
+        })
     }
 
     fn check_emergency_stop(&self) -> bool {
-        if !is_windows() {
-            return false;
+        // Check for hotkey events
+        if let Ok(event) = GlobalHotKeyEvent::receiver().try_recv() {
+            if event.id == self.hotkey.id() {
+                return true;
+            }
         }
+        false
+    }
+}
 
-        let pressed = key_pressed(self.emergency_key);
-        let mut last = self.last_state.lock().unwrap();
-
-        let triggered = pressed && !*last;
-        *last = pressed;
-
-        triggered
+impl Drop for HotkeyMonitor {
+    fn drop(&mut self) {
+        let _ = self.manager.unregister(self.hotkey);
     }
 }
 
@@ -149,7 +160,15 @@ impl AppState {
             start_time: None,
             telemetry,
             screenshots,
-            hotkeys: HotkeyMonitor::new(),
+            hotkeys: HotkeyMonitor::new().unwrap_or_else(|e| {
+                eprintln!("Warning: Failed to setup hotkey: {}", e);
+                eprintln!("Emergency stop (DELETE key) will not be available");
+                // Return a dummy that always returns false
+                HotkeyMonitor {
+                    manager: GlobalHotKeyManager::new().unwrap(),
+                    hotkey: HotKey::new(None, Code::Delete),
+                }
+            }),
             gui_sender: tx,
         }
     }
