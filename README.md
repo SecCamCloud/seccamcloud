@@ -236,7 +236,7 @@ cargo run --release --features screenshots -- --screenshots
 | Platform | GUI | Hotkeys | Screenshots | Status |
 |----------|-----|---------|-------------|--------|
 | **Windows 10/11** | ✅ | ✅ | ✅ | Full Support |
-| **Linux** | ✅ | ❌ | ✅ (X11) | Partial Support |
+| **Linux** | ✅ | ❌ | ✅ (X11 & Wayland) | Partial Support |
 | **macOS** | ✅ | ❌ | ⚠️ | Experimental |
 
 **Note:** Emergency stop hotkey (DELETE) only works on Windows.
