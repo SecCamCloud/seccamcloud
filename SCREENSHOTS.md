@@ -497,8 +497,8 @@ chmod 700 screenshots/
 | Feature | SecCamCloud | Flameshot | Spectacle | Greenshot |
 |---------|-------------|-----------|-----------|-----------|
 | **Automated** | ✅ | ❌ | ❌ | ⚠️ |
-| **X11 Support** | ✅ | ✅ | ✅ | N/A |
-| **Wayland Support** | ✅ | ⚠️ | ✅ | N/A |
+| **Linux (X11 Support)** | ✅ | ✅ | ✅ | N/A |
+| **Linux (Wayland Support)** | ✅ | ⚠️ | ✅ | N/A |
 | **Windows** | ✅ | ❌ | ❌ | ✅ |
 | **API/Code** | ✅ | ❌ | ❌ | ❌ |
 | **No GUI Required** | ✅ | ❌ | ❌ | ❌ |
