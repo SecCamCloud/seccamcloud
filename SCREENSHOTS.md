@@ -4,7 +4,7 @@
 
 The screenshot module provides automated screen capture functionality for SecCamCloud, with full support for Windows, Linux (X11 & Wayland), and macOS.
 
-**Version:** 1.1.0  
+**Version:** 1.0.0  
 **Author:** Michael Lauzon  
 **License:** GPLv2
 
@@ -517,8 +517,8 @@ chmod 700 screenshots/
 | Feature | SecCamCloud | Flameshot | Spectacle | Greenshot | macOS Screenshot |
 |---------|-------------|-----------|-----------|-----------|------------------|
 | **Automated** | ✅ | ❌ | ❌ | ⚠️ | ❌ |
-| **Linux X11** | ✅ | ✅ | ✅ | ❌ | ❌ |
-| **Linux Wayland** | ✅ | ⚠️ | ✅ | ❌ | ❌ |
+| **Linux (X11)** | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **Linux (Wayland)** | ✅ | ⚠️ | ✅ | ❌ | ❌ |
 | **Windows** | ✅ | ❌ | ❌ | ✅ | ❌ |
 | **macOS** | ✅ | ❌ | ❌ | ❌ | ✅ |
 | **API/Code** | ✅ | ❌ | ❌ | ❌ | ❌ |
