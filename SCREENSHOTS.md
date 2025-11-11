@@ -570,7 +570,6 @@ v1.0.0
 - Initial release
 - X11 and Wayland support via captrs
 - X11 fallback via scrap
-- Basic macOS support (experimental)
 
 ---
 
