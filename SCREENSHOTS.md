@@ -562,13 +562,11 @@ Possible additions (not yet implemented):
 
 ## Version History
 
-### v1.1.0 (Current)
+v1.0.0
 - Added full macOS support via screenshots crate
 - Native Core Graphics capture on macOS
 - Improved Windows support with native API
 - Triple fallback system for maximum compatibility
-
-### v1.0.0
 - Initial release
 - X11 and Wayland support via captrs
 - X11 fallback via scrap
