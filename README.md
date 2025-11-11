@@ -237,7 +237,7 @@ cargo run --release --features screenshots -- --screenshots
 |----------|-----|---------|-------------|--------|
 | **Windows 10/11** | ✅ | ✅ | ✅ | Full Support |
 | **Linux** | ✅ | ✅ | ✅ (X11 & Wayland) | Full Support |
-| **macOS** | ✅ | ✅ | ⚠️ | Partial Support |
+| **macOS** | ✅ | ✅ | ✅ | Full Support |
 
 **Note:** Emergency stop hotkey (DELETE key) now works on all platforms.
 
@@ -278,7 +278,7 @@ cargo run --release --features screenshots -- --screenshots
   sudo apt-get install libx11-dev libxrandr-dev
   ```
 - **Windows:** Should work out of the box
-- **macOS:** May require additional setup
+- **macOS:** Should work out of the box with Xcode Command Line Tools
 
 ---
 
