@@ -2,9 +2,9 @@
 
 ## Overview
 
-The screenshot module provides automated screen capture functionality for SecCamCloud, with support for Windows, Linux (X11 & Wayland), and macOS.
+The screenshot module provides automated screen capture functionality for SecCamCloud, with full support for Windows, Linux (X11 & Wayland), and macOS.
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Author:** Michael Lauzon  
 **License:** GPLv2
 
@@ -12,19 +12,21 @@ The screenshot module provides automated screen capture functionality for SecCam
 
 ## Features
 
-✅ **Cross-Platform Support**
-- Windows (native)
-- Linux X11 (primary method)
-- Linux Wayland (primary method)
-- macOS (experimental)
+✅ **Full Cross-Platform Support**
+- Windows (native API)
+- Linux X11 (multiple methods)
+- Linux Wayland (full support)
+- macOS (native Core Graphics)
 
-✅ **Dual Capture Methods**
-- `captrs` - Primary (supports X11 & Wayland)
-- `scrap` - Fallback (X11 only)
+✅ **Triple Capture Methods**
+- `captrs` - Primary (Linux X11 & Wayland)
+- `screenshots` - Secondary (Windows/macOS native)
+- `scrap` - Fallback (X11 compatibility)
 
-✅ **Automatic Fallback**
-- Tries captrs first
-- Falls back to scrap if needed
+✅ **Smart Fallback Chain**
+- Tries captrs first (best for Linux)
+- Falls back to screenshots (best for macOS/Windows)
+- Final fallback to scrap (X11)
 - Graceful failure handling
 
 ✅ **Integration**
@@ -46,8 +48,9 @@ cargo build --release --features screenshots
 ### Dependencies
 
 The screenshots feature includes:
-- `scrap` 0.5 - X11 screenshot capture
 - `captrs` 0.3 - X11 & Wayland capture
+- `screenshots` 0.8 - Native Windows/macOS support
+- `scrap` 0.5 - X11 screenshot capture
 - `image` 0.25 - Image processing and PNG encoding
 
 ---
@@ -99,17 +102,19 @@ screenshots/step2_after_20241108_143025.png
 
 ### Windows
 
-**Method:** scrap (native Windows API)
-- ✅ Full support
+**Primary Method:** screenshots crate (native Windows API)
+- ✅ Full native support
 - ✅ Multi-monitor
 - ✅ No additional setup
+- ✅ High performance
 
 ### Linux (X11)
 
-**Methods:** captrs (primary), scrap (fallback)
+**Methods:** captrs (primary), screenshots (secondary), scrap (fallback)
 - ✅ Full support
 - ✅ Auto-detection
 - ✅ No root required
+- ✅ Multiple fallback options
 
 **Requirements:**
 ```bash
@@ -118,19 +123,25 @@ sudo apt-get install libx11-dev libxrandr-dev
 
 ### Linux (Wayland)
 
-**Method:** captrs only
+**Method:** captrs (full Wayland support)
 - ✅ Full support
 - ✅ Auto-detection
 - ✅ No permission dialogs
+- ✅ Compositor-independent
 
-**Note:** scrap doesn't support Wayland, but captrs handles it automatically.
+**Note:** Only captrs supports Wayland properly.
 
 ### macOS
 
-**Method:** scrap
-- ⚠️ Experimental support
-- May require permissions
-- Screen Recording permission needed
+**Primary Method:** screenshots crate (native Core Graphics)
+- ✅ Full native support
+- ✅ Retina display support
+- ✅ Multi-monitor support
+- ✅ High quality capture
+
+**Requirements:**
+- Xcode Command Line Tools
+- Screen Recording permission (prompted on first use)
 
 ---
 
@@ -139,34 +150,41 @@ sudo apt-get install libx11-dev libxrandr-dev
 ### Capture Process
 
 1. **Check if enabled** - Return None if disabled
-2. **Try captrs first** - Works on X11 and Wayland
-3. **Fallback to scrap** - If captrs fails (X11 only)
-4. **Convert format** - BGRA → RGBA for PNG
-5. **Save to disk** - Timestamped filename
+2. **Try captrs first** - Best for Linux (X11 & Wayland)
+3. **Try screenshots second** - Native for macOS/Windows
+4. **Fallback to scrap** - X11 compatibility layer
+5. **Convert format** - BGRA → RGBA if needed
+6. **Save to disk** - Timestamped filename
 
-### Dual Method Strategy
+### Triple Method Strategy
 
 ```rust
 pub fn capture(&self, step_name: &str, suffix: &str) -> Option<String> {
-    // Try captrs first (X11 & Wayland)
+    // Try captrs first (best for Linux)
     if let Some(path) = self.capture_with_captrs(&filename) {
         return Some(path);
     }
     
-    // Fallback to scrap (X11 only)
+    // Try screenshots second (best for macOS/Windows)
+    if let Some(path) = self.capture_with_screenshots(&filename) {
+        return Some(path);
+    }
+    
+    // Fallback to scrap (X11 compatibility)
     if let Some(path) = self.capture_with_scrap(&filename) {
         return Some(path);
     }
     
-    None // Both failed
+    None // All methods failed
 }
 ```
 
-### Why Two Methods?
+### Why Three Methods?
 
-- **captrs** - Modern, supports Wayland, actively maintained
-- **scrap** - Mature, stable on X11, good fallback
-- **Fallback ensures** - Maximum compatibility
+- **captrs** - Modern, supports Wayland, best for Linux
+- **screenshots** - Native APIs for macOS/Windows
+- **scrap** - Mature, stable fallback for X11
+- **Maximum compatibility** - Works everywhere
 
 ---
 
@@ -294,10 +312,12 @@ echo $XDG_SESSION_TYPE  # Should show "wayland"
 ### macOS: Permission Denied
 
 **Solution:**
-1. System Preferences → Security & Privacy
-2. Privacy → Screen Recording
-3. Add SecCamCloud to allowed apps
+1. System Preferences → Security & Privacy → Privacy
+2. Screen Recording
+3. Add SecCamCloud to allowed apps (or Terminal if running from command line)
 4. Restart application
+
+**Note:** macOS will prompt for permission on first screenshot attempt.
 
 ### Empty Screenshots
 
@@ -494,20 +514,34 @@ chmod 700 screenshots/
 
 ## Comparison with Other Tools
 
-| Feature | SecCamCloud | Flameshot | Spectacle | Greenshot |
-|---------|-------------|-----------|-----------|-----------|
-| **Automated** | ✅ | ❌ | ❌ | ⚠️ |
-| **Linux (X11 Support)** | ✅ | ✅ | ✅ | N/A |
-| **Linux (Wayland Support)** | ✅ | ⚠️ | ✅ | N/A |
-| **Windows** | ✅ | ❌ | ❌ | ✅ |
-| **API/Code** | ✅ | ❌ | ❌ | ❌ |
-| **No GUI Required** | ✅ | ❌ | ❌ | ❌ |
+| Feature | SecCamCloud | Flameshot | Spectacle | Greenshot | macOS Screenshot |
+|---------|-------------|-----------|-----------|-----------|------------------|
+| **Automated** | ✅ | ❌ | ❌ | ⚠️ | ❌ |
+| **Linux X11** | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **Linux Wayland** | ✅ | ⚠️ | ✅ | ❌ | ❌ |
+| **Windows** | ✅ | ❌ | ❌ | ✅ | ❌ |
+| **macOS** | ✅ | ❌ | ❌ | ❌ | ✅ |
+| **API/Code** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **No GUI Required** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Cross-Platform** | ✅ | ❌ | ❌ | ❌ | ❌ |
 
 **SecCamCloud Advantages:**
-- Fully automated
-- Code-integrated
-- Cross-platform
+- Fully automated capture
+- Code-integrated API
+- True cross-platform (all major OSes)
 - No user interaction needed
+- Native quality on all platforms
+
+---
+
+## Platform Support Summary
+
+| Platform | Method | Quality | Performance | Setup Required |
+|----------|--------|---------|-------------|----------------|
+| **Windows** | Native API | Excellent | Fast | None |
+| **macOS** | Core Graphics | Excellent | Fast | Permission grant |
+| **Linux X11** | Multiple options | Excellent | Fast | Dev libraries |
+| **Linux Wayland** | captrs | Excellent | Fast | None |
 
 ---
 
@@ -523,6 +557,22 @@ Possible additions (not yet implemented):
 6. **Thumbnails** - Generate preview images
 
 **Note:** Video recording is available via the `vidrec` module.
+
+---
+
+## Version History
+
+### v1.1.0 (Current)
+- Added full macOS support via screenshots crate
+- Native Core Graphics capture on macOS
+- Improved Windows support with native API
+- Triple fallback system for maximum compatibility
+
+### v1.0.0
+- Initial release
+- X11 and Wayland support via captrs
+- X11 fallback via scrap
+- Basic macOS support (experimental)
 
 ---
 
@@ -545,9 +595,9 @@ For screenshot-related issues:
 **Platform-specific help:**
 - **Linux X11:** Install libx11-dev, libxrandr-dev
 - **Linux Wayland:** Should work automatically with captrs
-- **Windows:** Ensure no security software blocking
-- **macOS:** Grant Screen Recording permission
+- **Windows:** Should work out of the box
+- **macOS:** Grant Screen Recording permission when prompted
 
 ---
 
-**Ready to capture!** 📸✨
+**Ready to capture on all platforms!** 📸✨
